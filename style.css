@@ -37,10 +37,8 @@ body {
     justify-content: center;
     align-items: center;  /* จัดกลางแนวตั้ง */
     height: 100%; /* ทำให้ความสูงของ carousel เต็มจอ */
-    width: 50%;
+    width: 100%;
     display: block;
-    margin-left: auto;
-    margin-right: auto;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
