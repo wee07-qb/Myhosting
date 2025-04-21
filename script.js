@@ -20,6 +20,7 @@ document.addEventListener("DOMContentLoaded", () => {
         countdownText.style.display = "none";
         goBtn.style.display = "inline-block";
         localStorage.removeItem("cooldownTime");
+        startBtn.style.display = "none";
       }
     }, 1000);
   }

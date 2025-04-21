@@ -100,3 +100,7 @@ body {
     object-position: center;
     justify-content: center;
 }
+
+.navbar-minecraft {
+    background-color: #2d2d2d; /* หรือสีเขียว Minecraft */
+  }
