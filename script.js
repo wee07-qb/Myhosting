@@ -46,7 +46,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // ✅ ปุ่มไปยังเว็บปลายทาง
   goBtn.addEventListener("click", () => {
-    window.open("https://collshp.com/vian628", "_blank"); // เปิดลิงก์แรกในแท็บใหม่
+    window.open("https://s.shopee.co.th/8KcLx5n3x2", "_blank"); // เปิดลิงก์แรกในแท็บใหม่
   
     Swal.fire({
       title: "พร้อมแล้ว!",
