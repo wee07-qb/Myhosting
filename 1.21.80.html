@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Minecraft Vian</title>
+    <link rel="icon" type="logo.jpg" href="logo.jpg">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Kanit&display=swap" rel="stylesheet">
+  </head>
+  <body>
+
+    <!-- Minecraft Style Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-minecraft">
+      <div class="container-fluid">
+        <img src="logo.jpg" width="30" class="me-2" alt="MC Logo">
+        <a class="navbar-brand" href="#" id="text-head">
+          <h1 style="color: rgb(255, 255, 255);">MincraftZone</h1>
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+          aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+          <ul class="navbar-nav">
+            <li class="nav-item">
+              <a class="nav-link" href="download.html">หน้าแรก</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="download.html">ดาวน์โหลด</a>
+            </li>
+            <li class="nav-item"><a class="nav-link" href="downloadbeta.html">ดาวน์โหลดเบต้า</a></li>
+            <li class="nav-item">
+              <a class="nav-link" href="https://www.facebook.com/profile.php?id=100078084062985&locale=th_TH">ติดต่อ</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <div class="container my-5">
+        <div class="row g-4">
+          <!-- รูปภาพเลื่อน -->
+          <div id="minecraftCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-wrap="true">
+            <div class="carousel-inner rounded shadow">
+              <div class="carousel-item active">
+                <img src="https://www.minecraft.net/content/dam/minecraftnet/games/minecraft/screenshots/preview21u8_4_1170x500.jpg" class="d-block w-100" alt="Minecraft Image 1">
+              </div>
+              <div class="carousel-item">
+                <img src="https://www.minecraft.net/content/dam/minecraftnet/games/minecraft/screenshots/1_21_80_header.jpg" class="d-block w-100" alt="Minecraft Image 2">
+              </div>
+              <div class="carousel-item">
+                <img src="https://oyster.ignimgs.com/mediawiki/apis.ign.com/minecraft/1/17/1.21_Header.png" class="d-block w-100" alt="Minecraft Image 3">
+              </div>
+              <div class="carousel-item">
+                <img src="https://staticg.sportskeeda.com/editor/2024/02/884d5-17079365357870-1920.jpg" class="d-block w-100" alt="Minecraft Image 3">
+              </div>
+              <button class="carousel-control-prev" type="button" data-bs-target="#minecraftCarousel" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon"></span>
+              </button>
+              <button class="carousel-control-next" type="button" data-bs-target="#minecraftCarousel" data-bs-slide="next">
+                <span class="carousel-control-next-icon"></span>
+              </button>
+            </div>
+          </div>
+          
+      
+         <!-- อัปเดต Minecraft 1.21.80 -->
+            <div class="card shadow mb-3">
+                <div class="card-body">
+                <h3 class="card-title mb-4">🆕 Minecraft 1.21.80 อัปเดตล่าสุด!</h3>
+            
+                <p class="mb-3">
+                    <strong>🌋 โซนใหม่: Lava Depths</strong><br>
+                    ถ้ำใต้ดินลึกเต็มไปด้วยลาวา มีแร่พิเศษชื่อ Magmite และโอกาสเจอหินที่ให้พลังงานกับ Redstone อัตโนมัติ
+                </p>
+            
+                <p class="mb-3">
+                    <strong>🧟 มอนสเตอร์ใหม่:</strong><br>
+                    <span class="ms-3">• <strong>Molten Zombie:</strong> ซอมบี้ลาวา โจมตีแรง ติดไฟ</span><br>
+                    <span class="ms-3">• <strong>Lava Crawler:</strong> แมงมุมไฟ คลานเร็วในลาวา</span>
+                </p>
+            
+                <p class="mb-3">
+                    <strong>🛡️ ไอเทมใหม่:</strong><br>
+                    <span class="ms-3">• <strong>Magma Shield:</strong> ป้องกันไฟ 100% ชั่วคราว</span><br>
+                    <span class="ms-3">• <strong>Heat Sensor:</strong> ตรวจจับศัตรูจากความร้อน</span>
+                </p>
+            
+                <p class="mb-3">
+                    <strong>🧱 บล็อกใหม่:</strong><br>
+                    Molten Brick, Glowing Stone, Obsidian Lantern ฯลฯ
+                </p>
+            
+                <p class="mb-3">
+                    <strong>🚧 ปรับปรุงระบบ:</strong><br>
+                    <span class="ms-3">ระบบ pathfinding ฉลาดขึ้น</span><br>
+                    <span class="ms-3">มุมกล้องปรับนุ่มนวลเมื่อเคลื่อนกล้อง</span><br>
+                    <span class="ms-3">เพิ่มตัวเลือกปรับกราฟิกใหม่ “Balanced Mode”</span>
+                </p>
+                <!--ปุ่ม + Countdown -->
+               <div class="mt-4">
+                  <button type="button" id="button" class="btn btn-primary active" data-bs-toggle="button" aria-pressed="true" data-link1="https://s.shopee.co.th/2B1jiJVvRR" data-link2="https://mcpedl.org/getfile/5525?fbclid=IwY2xjawKHZ61leHRuA2FlbQIxMABicmlkETFFUnVsN2pMWDlTRGFBU1J4AR42jmGcTP04TljBFx4m0h65qhhL4HgFT3L4yNo61qRHgzVFz-Vx4t-VeJPHZw_aem_Gp53atIe71E8T4GoxuodNw">Click</button>
+          
+                  <p id="countdownText" class="mt-3" style="display: none;">
+                    กรุณารอ <span id="count"></span> วินาที...
+                  </p>
+          
+                  <button id="goBtn" class="btn btn-success mt-2" style="display: none;">
+                    ไปยังเว็บไซต์
+                  </button>
+                </div>
+          
+                 <!--Footer ขนาดเล็ก -->
+                <p class="card-text mt-4">
+                  <small class="text-body-secondary">Copyright 2025 © vian</small>
+                </p>
+              </div>
+            </div>
+          </div>
+          
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="script.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  </body>
+</html>
