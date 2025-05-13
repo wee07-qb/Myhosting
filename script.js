@@ -48,23 +48,26 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   goBtn.addEventListener("click", () => {
-    if (link1) {
-      const links = link1.split(",");
-      links.forEach(link => {
-        window.open(link.trim(), "_blank");
-      });
-    }
+  Swal.fire({
+    title: "พร้อมแล้ว!",
+    text: "คลิกเพื่อไปยังเว็บไซต์",
+    icon: "success",
+    confirmButtonText: "ไปเลย!",
+  }).then((result) => {
+    if (result.isConfirmed) {
+      // ✅ เปิด link1
+      if (link1) {
+        const links = link1.split(",");
+        links.forEach(link => {
+          window.open(link.trim(), "_blank");
+        });
+      }
 
-    // แสดง popup แล้ว redirect
-    Swal.fire({
-      title: "พร้อมแล้ว!",
-      text: "คลิกเพื่อไปยังเว็บไซต์",
-      icon: "success",
-      confirmButtonText: "ไปเลย!",
-    }).then((result) => {
-      if (result.isConfirmed && link2) {
+      // ✅ redirect หน้าไป link2
+      if (link2) {
         window.location.href = link2;
       }
-    });
+    }
   });
+ });
 });
