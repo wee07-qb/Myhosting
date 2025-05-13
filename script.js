@@ -49,18 +49,25 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   
     goBtn.addEventListener("click", () => {
-      if (link1) window.open(link1, "_blank");
-  
-      Swal.fire({
-        title: "พร้อมแล้ว!",
-        text: "คลิกเพื่อไปยังเว็บไซต์",
-        icon: "success",
-        confirmButtonText: "ไปเลย!",
-      }).then((result) => {
-        if (result.isConfirmed && link2) {
-          window.location.href = link2;
-        }
-      });
+  // ✅ เปิด link1 หลายลิงก์ในแท็บใหม่
+  if (link1) {
+    const links = link1.split(",");
+    links.forEach(link => {
+      window.open(link.trim(), "_blank");
     });
+  }
+
+  // ✅ แสดง popup ให้ user ยืนยันก่อน redirect
+  Swal.fire({
+    title: "พร้อมแล้ว!",
+    text: "คลิกเพื่อไปยังเว็บไซต์",
+    icon: "success",
+    confirmButtonText: "ไปเลย!",
+  }).then((result) => {
+    if (result.isConfirmed && link2) {
+      window.location.href = link2; // redirect หน้าปัจจุบัน
+    }
   });
+});
+});
   
