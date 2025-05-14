@@ -3,7 +3,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const countdownText = document.getElementById("countdownText");
   const countSpan = document.getElementById("count");
   const goBtn = document.getElementById("goBtn");
-  const cooldownSeconds = 10;
+  const cooldownSeconds = 5;
 
   if (!startBtn || !countdownText || !countSpan || !goBtn) return;
 
@@ -26,7 +26,7 @@ document.addEventListener("DOMContentLoaded", () => {
         localStorage.removeItem("cooldownTime");
         startBtn.style.display = "none";
       }
-    }, 1000);
+    }, 500);
   }
 
   startBtn.addEventListener("click", () => {
@@ -37,7 +37,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const lastClicked = localStorage.getItem("cooldownTime");
   if (lastClicked) {
     const now = Date.now();
-    const elapsed = Math.floor((now - Number(lastClicked)) / 1000);
+    const elapsed = Math.floor((now - Number(lastClicked)) / 500);
     const remaining = cooldownSeconds - elapsed;
 
     if (remaining > 0) {
