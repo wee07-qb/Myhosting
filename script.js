@@ -26,7 +26,7 @@ document.addEventListener("DOMContentLoaded", () => {
         localStorage.removeItem("cooldownTime");
         startBtn.style.display = "none";
       }
-    }, 500);
+    }, 1000);
   }
 
   startBtn.addEventListener("click", () => {
@@ -37,7 +37,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const lastClicked = localStorage.getItem("cooldownTime");
   if (lastClicked) {
     const now = Date.now();
-    const elapsed = Math.floor((now - Number(lastClicked)) / 500);
+    const elapsed = Math.floor((now - Number(lastClicked)) / 1000);
     const remaining = cooldownSeconds - elapsed;
 
     if (remaining > 0) {
