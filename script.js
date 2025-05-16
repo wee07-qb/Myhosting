@@ -72,7 +72,8 @@ document.addEventListener("DOMContentLoaded", () => {
  });
 });
 
-  const btn = document.getElementById('button');
+  /*const btn = document.getElementById('button');
   btn.addEventListener('click', () => {
   window.open("https://www.lazada.co.th/products/2022-i5661814104-s24147192009.html?trafficFrom=17449020_303586&laz_trackid=2:mm_321251106_287552583_2244402583:clkgikqsm1ir5bco0e9r4o&mkttid=clkgikqsm1ir5bco0e9r4o", "_blank");
-  });
+  });*/
+
