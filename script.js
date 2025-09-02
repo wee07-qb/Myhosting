@@ -4,120 +4,125 @@ document.addEventListener("DOMContentLoaded", () => {
   const countdownText = document.getElementById("countdownText");
   const countSpan = document.getElementById("count");
   const goBtn = document.getElementById("goBtn");
-  const cooldownSeconds = 5;
 
-  if (!startBtn || !countdownText || !countSpan || !goBtn) {
-    console.warn("[countdown] element missing", { startBtn, countdownText, countSpan, goBtn });
-    return;
-  }
+  // ตั้งได้: นาทีที่ใช้ตัดสิน (ค่าเริ่ม 5 นาที)
+  const THRESHOLD_MS = 5 * 60 * 1000;
+  const COOLDOWN_SEC = 5;
 
-  // กัน Bootstrap toggle ทำให้ state แปลก
+  // local/session keys
+  const KEY_COOLDOWN = "cooldownTime";
+  const KEY_PENDING2 = "pending_link2";
+  const KEY_LEFT_AT  = "left_for_link1_at";
+  const KEY_DONE2    = "link2_redirected"; // กันเด้งซ้ำในรอบเดียว
+
+  if (!startBtn || !countdownText || !countSpan || !goBtn) return;
+
+  // กัน Bootstrap toggle
   startBtn.removeAttribute("data-bs-toggle");
   startBtn.classList.remove("active");
-  startBtn.disabled = false;
   goBtn.style.display = "none";
   countdownText.style.display = "none";
 
   const link1 = (startBtn.dataset.link1 || "").trim();
   const link2 = (startBtn.dataset.link2 || "").trim();
 
-  // ใช้ตัวแปรเก็บ interval กันการสร้างซ้ำ
-  let countdownTimer = null;
-
-  function clearTimer() {
-    if (countdownTimer) {
-      clearInterval(countdownTimer);
-      countdownTimer = null;
-    }
-  }
-
-  function setCooldown(seconds) {
-    console.log("[countdown] start", seconds, "sec");
+  // ---------- Countdown ----------
+  let timer = null;
+  function clearTimer(){ if (timer){ clearInterval(timer); timer=null; } }
+  function startCooldown(sec){
     clearTimer();
     startBtn.disabled = true;
     countdownText.style.display = "block";
     goBtn.style.display = "none";
-    countSpan.textContent = seconds;
-
-    countdownTimer = setInterval(() => {
-      seconds -= 1;
-      countSpan.textContent = seconds;
-      if (seconds <= 0) {
+    countSpan.textContent = sec;
+    timer = setInterval(() => {
+      sec -= 1;
+      countSpan.textContent = sec;
+      if (sec <= 0){
         clearTimer();
         countdownText.style.display = "none";
         goBtn.style.display = "inline-block";
-        localStorage.removeItem("cooldownTime");
+        localStorage.removeItem(KEY_COOLDOWN);
         startBtn.style.display = "none";
-        console.log("[countdown] done");
       }
     }, 1000);
   }
 
-  // คลิกเริ่มนับ
   startBtn.addEventListener("click", (e) => {
     e.preventDefault();
-    console.log("[countdown] button clicked");
-    localStorage.setItem("cooldownTime", String(Date.now()));
-    setCooldown(cooldownSeconds);
+    localStorage.setItem(KEY_COOLDOWN, String(Date.now()));
+    startCooldown(COOLDOWN_SEC);
   });
 
-  // ถ้ารีเฟรชระหว่างคูลดาวน์ ให้คืน state
-  try {
-    const lastClicked = localStorage.getItem("cooldownTime");
-    if (lastClicked) {
-      const now = Date.now();
-      const elapsed = Math.floor((now - Number(lastClicked)) / 1000);
-      const remaining = cooldownSeconds - elapsed;
-      console.log("[countdown] resume check", { elapsed, remaining });
-      if (remaining > 0) setCooldown(remaining);
-      else localStorage.removeItem("cooldownTime");
-    }
-  } catch (err) {
-    console.error("[countdown] resume error", err);
-    localStorage.removeItem("cooldownTime");
-  }
+  // Resume ระหว่างคูลดาวน์
+  (function resumeCooldown(){
+    const last = Number(localStorage.getItem(KEY_COOLDOWN) || 0);
+    if (!last) return;
+    const elapsed = Math.floor((Date.now() - last) / 1000);
+    const remain  = COOLDOWN_SEC - elapsed;
+    if (remain > 0) startCooldown(remain);
+    else localStorage.removeItem(KEY_COOLDOWN);
+  })();
 
-  // ไป Shopee แล้วตั้งธงกลับมาเปิด link2
-  goBtn.addEventListener("click", async (e) => {
-    e.preventDefault();
-
-    const goNow = async () => {
-      const targetLoc = (window.top === window.self) ? window.location : window.top.location;
-      if (link1) {
-        localStorage.setItem("pending_link2", "1");
-        targetLoc.assign(link1);
+  // ---------- ไป Shopee (link1) แล้วตั้งธงกลับมา ----------
+  async function confirmThenGo(){
+    const go = async () => {
+      if (link1){
+        // ตั้งธงว่า “กลับมาให้พิจารณาเวลา” และบันทึกเวลาออก
+        localStorage.setItem(KEY_PENDING2, "1");
+        localStorage.setItem(KEY_LEFT_AT, String(Date.now()));
+        (window.top === window.self ? window.location : window.top.location).assign(link1);
         return;
       }
-      if (link2) targetLoc.assign(link2);
+      if (link2){
+        (window.top === window.self ? window.location : window.top.location).assign(link2);
+      }
     };
 
-    if (typeof Swal !== "undefined") {
-      const result = await Swal.fire({
+    if (typeof Swal !== "undefined"){
+      const res = await Swal.fire({
         title: "พร้อมแล้ว!",
         text: "คลิกเพื่อไปยังเว็บไซต์",
         icon: "success",
         confirmButtonText: "ไปเลย!",
       });
-      if (result.isConfirmed) goNow();
+      if (res.isConfirmed) await go();
     } else {
-      goNow();
+      await go();
     }
+  }
+
+  goBtn.addEventListener("click", (e) => {
+    e.preventDefault();
+    confirmThenGo();
   });
 
-  // กลับมาจาก Back ให้เด้ง link2
+  // ---------- เมื่อย้อนกลับมา ให้ตรวจเวลาแล้วตัดสินใจ ----------
   window.addEventListener("pageshow", () => {
-    const shouldGo2 = localStorage.getItem("pending_link2") === "1";
-    const already = sessionStorage.getItem("link2_redirected") === "1";
-    if (shouldGo2 && !already && link2) {
-      localStorage.removeItem("pending_link2");
-      sessionStorage.setItem("link2_redirected", "1");
-      const targetLoc = (window.top === window.self) ? window.location : window.top.location;
-      targetLoc.assign(link2);
-    }
-  });
+    const pending = localStorage.getItem(KEY_PENDING2) === "1";
+    const already = sessionStorage.getItem(KEY_DONE2) === "1";
+    if (!pending || already) return;
 
-  // กัน error ทำให้สคริปต์หยุดทั้งไฟล์แบบเงียบๆ
-  window.addEventListener("error", (ev) => {
-    console.error("[global error]", ev.message, ev.filename, ev.lineno + ":" + ev.colno);
+    const leftAt = Number(localStorage.getItem(KEY_LEFT_AT) || 0);
+    const now = Date.now();
+    const elapsed = now - leftAt;
+
+    const targetLoc = (window.top === window.self) ? window.location : window.top.location;
+
+    if (leftAt && link2 && elapsed <= THRESHOLD_MS){
+      // กลับมา “ภายใน” 5 นาที → ไป link2
+      localStorage.removeItem(KEY_PENDING2);
+      sessionStorage.setItem(KEY_DONE2, "1");
+      targetLoc.assign(link2);
+    } else if (link1){
+      // กลับมา “เกิน” 5 นาที (หรือไม่มีเวลา/ไม่มี link2) → ไป Shopee อีกรอบ
+      // อัปเดตเวลาออกใหม่เพื่อใช้ตัดสินรอบถัดไป
+      localStorage.setItem(KEY_LEFT_AT, String(Date.now()));
+      // ยังคง KEY_PENDING2 = "1" ไว้ เพื่อให้รอบถัดไปตัดสินได้อีก
+      targetLoc.assign(link1);
+    } else {
+      // ไม่มี link1 ก็ยกเลิกสถานะค้าง
+      localStorage.removeItem(KEY_PENDING2);
+    }
   });
 });
