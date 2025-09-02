@@ -47,7 +47,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  goBtn.addEventListener("click", () => {
+  goBtn.addEventListener("click", (e) => {
+  e.preventDefault();
   Swal.fire({
     title: "พร้อมแล้ว!",
     text: "คลิกเพื่อไปยังเว็บไซต์",
@@ -55,25 +56,18 @@ document.addEventListener("DOMContentLoaded", () => {
     confirmButtonText: "ไปเลย!",
   }).then((result) => {
     if (result.isConfirmed) {
-      // ✅ เปิด link1
+      // ไปในแท็บเดิม (ไม่เปิด Chrome/ไม่เปิดแท็บใหม่)
+      const targetLoc = (window.top === window.self) ? window.location : window.top.location;
+
       if (link1) {
-        const links = link1.split(",");
-        links.forEach(link => {
-          window.open(link.trim(), "_blank");
-        });
+        targetLoc.assign(link1.trim());  // ← เด้งไป Shopee ทันทีในแท็บเดิม
+        return;                          // หมายเหตุ: หลังจากนี้สคริปต์จะไม่รันต่อแล้ว
       }
 
-      // ✅ redirect หน้าไป link2
+      // ถ้าไม่มี link1 ค่อยไป link2
       if (link2) {
-        window.location.href = link2;
+        targetLoc.assign(link2.trim());
       }
     }
   });
- });
 });
-
-  /*const btn = document.getElementById('button');
-  btn.addEventListener('click', () => {
-  window.open("https://www.lazada.co.th/products/2022-i5661814104-s24147192009.html?trafficFrom=17449020_303586&laz_trackid=2:mm_321251106_287552583_2244402583:clkgikqsm1ir5bco0e9r4o&mkttid=clkgikqsm1ir5bco0e9r4o", "_blank");
-  });*/
-
