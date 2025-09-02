@@ -1,45 +1,65 @@
 
 document.addEventListener("DOMContentLoaded", () => {
-  const startBtn = document.getElementById("button");
-  const countdownText = document.getElementById("countdownText");
-  const countSpan = document.getElementById("count");
-  const goBtn = document.getElementById("goBtn");
+  // ===== ELEMENTS =====
+  const startBtn      = document.getElementById("button");        // ปุ่มเริ่มนับถอยหลัง
+  const countdownText = document.getElementById("countdownText"); // "กรุณารอ X วินาที..."
+  const countSpan     = document.getElementById("count");         // X
+  const goBtn         = document.getElementById("goBtn");         // ปุ่ม "ไปยังเว็บไซต์"
 
-  // ตั้งได้: นาทีที่ใช้ตัดสิน (ค่าเริ่ม 5 นาที)
-  const THRESHOLD_MS = 5 * 60 * 1000;
-  const COOLDOWN_SEC = 5;
+  // ถ้า element ไหนหาย ให้หยุดเลย
+  if (!startBtn || !countdownText || !countSpan || !goBtn) {
+    console.warn("[redirect] missing element(s)", { startBtn, countdownText, countSpan, goBtn });
+    return;
+  }
 
-  // local/session keys
-  const KEY_COOLDOWN = "cooldownTime";
-  const KEY_PENDING2 = "pending_link2";
-  const KEY_LEFT_AT  = "left_for_link1_at";
-  const KEY_DONE2    = "link2_redirected"; // กันเด้งซ้ำในรอบเดียว
+  // ===== CONFIG =====
+  const COOLDOWN_SEC  = 5;                 // เวลานับถอยหลังก่อนโชว์ปุ่ม go
+  const THRESHOLD_MS  = 5 * 60 * 1000;     // 5 นาที
+  const KEY_COOLDOWN  = "cooldownTime";    // เก็บเวลาคลิกเริ่มนับ
+  const KEY_LAST_L1   = "last_link1_time"; // เก็บเวลาที่เคยเด้งไปลิงก์ 1 ล่าสุด
 
-  if (!startBtn || !countdownText || !countSpan || !goBtn) return;
+  // อ่านลิงก์จาก data-* (รองรับทั้งอยู่บน startBtn หรือ goBtn)
+  const link1 =
+    (startBtn.dataset.link1 || goBtn.dataset.link1 || "").trim();
+  const link2 =
+    (startBtn.dataset.link2 || goBtn.dataset.link2 || "").trim();
 
-  // กัน Bootstrap toggle
+  if (!link1) console.warn("[redirect] data-link1 is empty");
+  if (!link2) console.warn("[redirect] data-link2 is empty");
+
+  // กัน Bootstrap toggle ที่ทำ state แปลก
   startBtn.removeAttribute("data-bs-toggle");
   startBtn.classList.remove("active");
+
+  // init UI
   goBtn.style.display = "none";
   countdownText.style.display = "none";
+  startBtn.disabled = false;
 
-  const link1 = (startBtn.dataset.link1 || "").trim();
-  const link2 = (startBtn.dataset.link2 || "").trim();
+  // ===== HELPERS =====
+  const targetLoc = (window.top === window.self) ? window.location : window.top.location;
 
-  // ---------- Countdown ----------
+  function navigate(url) {
+    if (!url) return;
+    targetLoc.assign(url);
+  }
+
+  // ===== COUNTDOWN =====
   let timer = null;
-  function clearTimer(){ if (timer){ clearInterval(timer); timer=null; } }
-  function startCooldown(sec){
-    clearTimer();
+  function stopTimer() { if (timer) { clearInterval(timer); timer = null; } }
+
+  function startCooldown(sec) {
+    stopTimer();
     startBtn.disabled = true;
     countdownText.style.display = "block";
     goBtn.style.display = "none";
     countSpan.textContent = sec;
+
     timer = setInterval(() => {
       sec -= 1;
       countSpan.textContent = sec;
-      if (sec <= 0){
-        clearTimer();
+      if (sec <= 0) {
+        stopTimer();
         countdownText.style.display = "none";
         goBtn.style.display = "inline-block";
         localStorage.removeItem(KEY_COOLDOWN);
@@ -48,14 +68,15 @@ document.addEventListener("DOMContentLoaded", () => {
     }, 1000);
   }
 
+  // เริ่มนับถอยหลังเมื่อกดปุ่มเริ่ม
   startBtn.addEventListener("click", (e) => {
     e.preventDefault();
     localStorage.setItem(KEY_COOLDOWN, String(Date.now()));
     startCooldown(COOLDOWN_SEC);
   });
 
-  // Resume ระหว่างคูลดาวน์
-  (function resumeCooldown(){
+  // กรณีรีเฟรชระหว่างคูลดาวน์ ให้คำนวณเวลาที่เหลือ
+  (() => {
     const last = Number(localStorage.getItem(KEY_COOLDOWN) || 0);
     if (!last) return;
     const elapsed = Math.floor((Date.now() - last) / 1000);
@@ -64,65 +85,26 @@ document.addEventListener("DOMContentLoaded", () => {
     else localStorage.removeItem(KEY_COOLDOWN);
   })();
 
-  // ---------- ไป Shopee (link1) แล้วตั้งธงกลับมา ----------
-  async function confirmThenGo(){
-    const go = async () => {
-      if (link1){
-        // ตั้งธงว่า “กลับมาให้พิจารณาเวลา” และบันทึกเวลาออก
-        localStorage.setItem(KEY_PENDING2, "1");
-        localStorage.setItem(KEY_LEFT_AT, String(Date.now()));
-        (window.top === window.self ? window.location : window.top.location).assign(link1);
-        return;
-      }
-      if (link2){
-        (window.top === window.self ? window.location : window.top.location).assign(link2);
-      }
-    };
-
-    if (typeof Swal !== "undefined"){
-      const res = await Swal.fire({
-        title: "พร้อมแล้ว!",
-        text: "คลิกเพื่อไปยังเว็บไซต์",
-        icon: "success",
-        confirmButtonText: "ไปเลย!",
-      });
-      if (res.isConfirmed) await go();
-    } else {
-      await go();
-    }
-  }
-
+  // ===== GO BUTTON LOGIC (ตามเงื่อนไขที่คุณกำหนด) =====
+  // ถ้า "เคยเด้งไปลิงก์1มาแล้ว" และ "กลับมาภายใน 5 นาที" -> ไปลิงก์2
+  // มิฉะนั้น -> ไปลิงก์1 และบันทึกเวลาใหม่
   goBtn.addEventListener("click", (e) => {
     e.preventDefault();
-    confirmThenGo();
-  });
 
-  // ---------- เมื่อย้อนกลับมา ให้ตรวจเวลาแล้วตัดสินใจ ----------
-  window.addEventListener("pageshow", () => {
-    const pending = localStorage.getItem(KEY_PENDING2) === "1";
-    const already = sessionStorage.getItem(KEY_DONE2) === "1";
-    if (!pending || already) return;
-
-    const leftAt = Number(localStorage.getItem(KEY_LEFT_AT) || 0);
+    const lastLink1 = Number(localStorage.getItem(KEY_LAST_L1) || 0);
     const now = Date.now();
-    const elapsed = now - leftAt;
+    const within5min = lastLink1 && (now - lastLink1) <= THRESHOLD_MS;
 
-    const targetLoc = (window.top === window.self) ? window.location : window.top.location;
-
-    if (leftAt && link2 && elapsed <= THRESHOLD_MS){
-      // กลับมา “ภายใน” 5 นาที → ไป link2
-      localStorage.removeItem(KEY_PENDING2);
-      sessionStorage.setItem(KEY_DONE2, "1");
-      targetLoc.assign(link2);
-    } else if (link1){
-      // กลับมา “เกิน” 5 นาที (หรือไม่มีเวลา/ไม่มี link2) → ไป Shopee อีกรอบ
-      // อัปเดตเวลาออกใหม่เพื่อใช้ตัดสินรอบถัดไป
-      localStorage.setItem(KEY_LEFT_AT, String(Date.now()));
-      // ยังคง KEY_PENDING2 = "1" ไว้ เพื่อให้รอบถัดไปตัดสินได้อีก
-      targetLoc.assign(link1);
+    if (within5min && link2) {
+      // ภายใน 5 นาที → ไป link2
+      navigate(link2);
     } else {
-      // ไม่มี link1 ก็ยกเลิกสถานะค้าง
-      localStorage.removeItem(KEY_PENDING2);
+      // ยังไม่เคยไป หรือ เกิน 5 นาที → ไป link1 และบันทึกเวลา
+      localStorage.setItem(KEY_LAST_L1, String(now));
+      navigate(link1 || link2); // เผื่อไม่มี link1 จะลองใช้ link2 แทน
     }
   });
+
+  // ===== (ไม่บังคับ) SweetAlert2 รองรับได้ถ้าต้องการ =====
+  // ถ้าอยากให้ขึ้นยืนยันก่อน ให้ครอบ navigate ด้วย Swal.fire ได้ตามต้องการ
 });
