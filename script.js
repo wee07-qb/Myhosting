@@ -1,3 +1,4 @@
+
 document.addEventListener("DOMContentLoaded", () => {
   const startBtn = document.getElementById("button");
   const countdownText = document.getElementById("countdownText");
@@ -83,36 +84,4 @@ document.addEventListener("DOMContentLoaded", () => {
       targetLoc.assign(link2);                              // เด้ง link2 ในแท็บเดิม
     }
   });
-});    });
-
-    if (result.isConfirmed) {
-      if (link1) {
-        // ตั้งธงก่อนออกจากหน้านี้
-        localStorage.setItem("pending_link2", "1");
-        location.assign(link1); // ไป Shopee แท็บเดิม
-        return;
-      }
-      if (link2) location.assign(link2);
-    }
-  });
-
-  // --- เมื่อผู้ใช้ย้อนกลับมาหน้าเดิม ให้เช็กธงแล้วไป link2 ---
-  window.addEventListener("pageshow", (ev) => {
-    // ยิงทั้งจากโหลดใหม่และ BFCache; เราเช็กธงเอง
-    const shouldGo2 = localStorage.getItem("pending_link2") === "1";
-
-    // กันลูป/กันเด้งซ้ำหลายครั้งใน session เดียว
-    const already = sessionStorage.getItem("link2_redirected") === "1";
-
-    // เงื่อนไข: มีธง + ยังไม่เคยเด้ง + มี link2
-    if (shouldGo2 && !already && link2) {
-      // เคลียร์ธงทันที (กันวน)
-      localStorage.removeItem("pending_link2");
-      sessionStorage.setItem("link2_redirected", "1");
-
-      // เด้งไป link2 ในแท็บเดิม
-      location.assign(link2);
-    }
-  });
 });
-
