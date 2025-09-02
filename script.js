@@ -1,3 +1,4 @@
+
 document.addEventListener("DOMContentLoaded", () => {
   const startBtn = document.getElementById("button");
   const countdownText = document.getElementById("countdownText");
@@ -7,8 +8,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (!startBtn || !countdownText || !countSpan || !goBtn) return;
 
-  const link1 = startBtn.dataset.link1;
-  const link2 = startBtn.dataset.link2;
+  // กัน Bootstrap toggle (ถ้าเผลอใส่)
+  startBtn.removeAttribute("data-bs-toggle");
+
+  const link1 = (startBtn.dataset.link1 || "").trim();
+  const link2 = (startBtn.dataset.link2 || "").trim();
 
   function setCooldown(seconds) {
     startBtn.disabled = true;
@@ -29,11 +33,13 @@ document.addEventListener("DOMContentLoaded", () => {
     }, 1000);
   }
 
-  startBtn.addEventListener("click", () => {
+  startBtn.addEventListener("click", (e) => {
+    e.preventDefault();
     localStorage.setItem("cooldownTime", Date.now());
     setCooldown(cooldownSeconds);
   });
 
+  // คืนสถานะเดิมถ้ารีเฟรชระหว่างคูลดาวน์
   const lastClicked = localStorage.getItem("cooldownTime");
   if (lastClicked) {
     const now = Date.now();
@@ -47,27 +53,30 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  goBtn.addEventListener("click", (e) => {
-  e.preventDefault();
-  Swal.fire({
-    title: "พร้อมแล้ว!",
-    text: "คลิกเพื่อไปยังเว็บไซต์",
-    icon: "success",
-    confirmButtonText: "ไปเลย!",
-  }).then((result) => {
-    if (result.isConfirmed) {
-      // ไปในแท็บเดิม (ไม่เปิด Chrome/ไม่เปิดแท็บใหม่)
+  goBtn.addEventListener("click", async (e) => {
+    e.preventDefault();
+
+    // เผื่อกรณี SweetAlert2 ยังโหลดไม่ทัน
+    if (typeof Swal === "undefined") {
+      // ไปต่อทันทีแบบไม่ขึ้นแจ้งเตือน
       const targetLoc = (window.top === window.self) ? window.location : window.top.location;
+      if (link1) { targetLoc.assign(link1); return; }
+      if (link2) { targetLoc.assign(link2); return; }
+      return;
+    }
 
-      if (link1) {
-        targetLoc.assign(link1.trim());  // ← เด้งไป Shopee ทันทีในแท็บเดิม
-        return;                          // หมายเหตุ: หลังจากนี้สคริปต์จะไม่รันต่อแล้ว
-      }
+    const result = await Swal.fire({
+      title: "พร้อมแล้ว!",
+      text: "คลิกเพื่อไปยังเว็บไซต์",
+      icon: "success",
+      confirmButtonText: "ไปเลย!",
+    });
 
-      // ถ้าไม่มี link1 ค่อยไป link2
-      if (link2) {
-        targetLoc.assign(link2.trim());
-      }
+    if (result.isConfirmed) {
+      // ไปในแท็บเดิม (ไม่เปิดแท็บใหม่/ไม่โยนไป Chrome)
+      const targetLoc = (window.top === window.self) ? window.location : window.top.location;
+      if (link1) { targetLoc.assign(link1); return; }
+      if (link2) { targetLoc.assign(link2); return; }
     }
   });
 });
